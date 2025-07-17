@@ -28,6 +28,10 @@ let PatientController = class PatientController {
     create(createPatientDto, req) {
         const token = req.cookies['jwt'];
         const decoded = this.jwtService.verify(token);
+        console.log(decoded);
+        if (decoded.role !== 'Patient') {
+            return new common_1.UnauthorizedException();
+        }
         const userID = decoded.sub;
         return this.patientService.create(createPatientDto, userID);
     }

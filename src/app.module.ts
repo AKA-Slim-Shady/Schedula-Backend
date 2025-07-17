@@ -8,9 +8,11 @@ import { AuthController } from './auth/auth.controller';
 import { AuthModule } from './auth/auth.module';
 import { AuthService } from './auth/auth.service';
 import { PatientModule } from './patient/patient.module';
+import { DoctorModule } from './doctor/doctor.module';
+import { AppointmentModule } from './appointment/appointment.module';
 
 @Module({
-  imports: [DemoModule , TypeOrmModule.forRoot(pgConfig), AuthModule, PatientModule],
+  imports: [DemoModule , TypeOrmModule.forRoot(pgConfig), AuthModule, PatientModule, DoctorModule, AppointmentModule],
   controllers: [AppController],
   providers: [AppService],
 })
