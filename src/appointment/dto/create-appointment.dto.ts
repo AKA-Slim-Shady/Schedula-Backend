@@ -1,9 +1,6 @@
 import { IsNumber, IsString, IsDateString, IsEnum, IsNotEmpty, IsOptional } from "class-validator";
+import { ConsultingDay } from "../entities/appointment.entity";
 
-export enum ConsultingType {
-  REGULAR = 'Regular',
-  ONLINE = 'Online',
-}
 
 export class CreateAppointmentDto {
   @IsNumber()
@@ -18,7 +15,7 @@ export class CreateAppointmentDto {
   @IsOptional() // Optional to support "Confirm time later"
   bookingTime?: string; // Format: HH:MM
 
-  @IsEnum(ConsultingType)
+  @IsEnum(ConsultingDay)
   @IsNotEmpty()
-  consultingType: ConsultingType; 
+  consultingday : ConsultingDay;
 }

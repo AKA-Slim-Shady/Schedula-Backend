@@ -6,9 +6,8 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 
-export enum ConsultingType {
-  REGULAR = 'Regular',
-  ONLINE = 'Online',
+export enum ConsultingDay {
+  MONDAY = 'Monday' , TUESDAY = 'Tuesday' , WEDNESDAY = 'Wednesday' , THURSDAY = 'Thursday' , FRIDAY = 'Friday' , SATURDAY = 'Saturday' , SUNDAY = 'Sunday'
 }
 
 export enum AppointmentStatus {
@@ -39,10 +38,10 @@ export class Appointment {
 
   @Column({
     type: 'enum',
-    enum: ConsultingType,
-    name: 'consulting_type',
+    enum: ConsultingDay,
+    name: 'consulting_day',
   })
-  consultingType: ConsultingType;
+  consultingday: ConsultingDay;
 
   @Column({
     type: 'enum',
