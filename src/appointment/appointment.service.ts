@@ -29,12 +29,4 @@ export class AppointmentService {
   async findAll(): Promise<Appointment[]> {
     return this.appointmentsRepository.find();
   }
-
-  async findOne(id: number): Promise<Appointment> {
-    const appointment = await this.appointmentsRepository.findOneBy({ id });
-    if (!appointment) {
-      throw new NotFoundException(`Appointment with ID #${id} not found`);
-    }
-    return appointment;
-  }
 }
