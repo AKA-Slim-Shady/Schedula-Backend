@@ -29,8 +29,23 @@ let PatientService = class PatientService {
     async findAll() {
         return await this.patient.find();
     }
-    findOne(id) {
-        return `This action returns a #${id} patient`;
+    async findOne(id) {
+        const patient = await this.patient.findOneBy({ id: id });
+        if (!patient) {
+            throw new common_1.NotFoundException(`Patient with ID #${id} not found`);
+        }
+        return patient;
+    }
+    async findOneByUserId(userId) {
+        const patient = await this.patient.findOneBy({
+            user: {
+                id: userId,
+            },
+        });
+        if (!patient) {
+            throw new common_1.NotFoundException(`Patient profile for user ID #${userId} not found`);
+        }
+        return patient;
     }
     update(id, updatePatientDto) {
         return `This action updates a #${id} patient`;

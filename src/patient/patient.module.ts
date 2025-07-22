@@ -13,5 +13,6 @@ import { JwtModule } from '@nestjs/jwt';
     }),],
   controllers: [PatientController],
   providers: [PatientService],
+  exports : [PatientService]
 })
 export class PatientModule {}

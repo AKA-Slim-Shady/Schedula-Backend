@@ -7,7 +7,8 @@ export declare class PatientService {
     constructor(patient: Repository<Patient>);
     create(createPatientDto: CreatePatientDto, userID: number): Promise<Patient>;
     findAll(): Promise<Patient[]>;
-    findOne(id: number): string;
+    findOne(id: number): Promise<Patient>;
+    findOneByUserId(userId: number): Promise<Patient>;
     update(id: number, updatePatientDto: UpdatePatientDto): string;
     remove(id: number): string;
 }
