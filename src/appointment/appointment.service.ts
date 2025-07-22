@@ -29,4 +29,12 @@ export class AppointmentService {
   async findAll(): Promise<Appointment[]> {
     return this.appointmentsRepository.find();
   }
+
+  async findOneByDoctorAndDate(id : number , date : string){
+    const found = await this.appointmentsRepository.find({where : {doctorId : id , bookingDate : date}});
+    if(!found){
+      throw new NotFoundException;
+    }
+    return found;
+  }
 }

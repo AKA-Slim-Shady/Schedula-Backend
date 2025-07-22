@@ -45,7 +45,7 @@ export class DoctorService {
   async showPatients(id : number){
     const found = await this.patientRepo.find({where : {doctorId : id}});
     if(!found){
-      return NotFoundException;
+      throw new NotFoundException;
     }
     return found;
   }

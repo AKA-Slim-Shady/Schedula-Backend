@@ -28,4 +28,6 @@ export class AppointmentController {
     }
     return this.appointmentService.findAll();
   }
+
+  
 }
