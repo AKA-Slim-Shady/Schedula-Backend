@@ -6,6 +6,7 @@ import { Doctor } from './entities/doctor.entity';
 import { Repository } from 'typeorm';
 import { Availability } from './entities/availability.entity';
 import { Appointment } from 'src/appointment/entities/appointment.entity';
+import { UpdateAvailabilityDTO } from './dto/update-availability.dto';
 
 @Injectable()
 export class DoctorService {
@@ -49,4 +50,17 @@ export class DoctorService {
     }
     return found;
   }
+
+  async updateAvailability(id: number, updateDTO: UpdateAvailabilityDTO) {
+  const old = await this.AvailabilityRepository.findOneBy({ doctor_id: id });
+  if (!old) {
+    throw new NotFoundException();
+  }
+
+  old.doctor_id = updateDTO.doctor_id;
+  old.start_time = new Date(updateDTO.start_time);
+  old.end_time = new Date(updateDTO.end_time);
+
+  return await this.AvailabilityRepository.save(old);
+ }
 }

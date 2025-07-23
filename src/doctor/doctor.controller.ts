@@ -1,10 +1,12 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Req, UnauthorizedException, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Req, UnauthorizedException, Query, NotFoundException } from '@nestjs/common';
 import { Request } from 'express';
 import { DoctorService } from './doctor.service';
 import { CreateDoctorDto } from './dto/create-doctor.dto';
 import { JwtService } from '@nestjs/jwt';
 import { CreateAvailabilityDto } from './dto/availability.dto';
 import { AppointmentService } from 'src/appointment/appointment.service';
+import { UpdateAvailabilityDTO } from './dto/update-availability.dto';
+import { Appointment } from 'src/appointment/entities/appointment.entity';
 
 @Controller('doctor')
 export class DoctorController {
@@ -72,4 +74,69 @@ export class DoctorController {
     const availableSlots = slots.filter(slot => !bookedSlots.includes(slot));
     return availableSlots;
   }
+
+  @Patch('updateAvailability/:id')
+  async updateBasedOnDoctorAvailability(
+  @Body() updateDTO: UpdateAvailabilityDTO,
+  @Param('id') doc_id: string,
+  @Query('date') bookingdate: string
+  ) {
+  const updated = await this.doctorService.updateAvailability(parseInt(doc_id), updateDTO);
+
+  const updatedStart = new Date(updated.start_time);
+  const updatedEnd = new Date(updated.end_time);
+
+  const appointments = await this.appointmentService.findOneByDoctorAndDate(parseInt(doc_id), bookingdate);
+
+  let needChanges: {
+  id: number;
+  fullDateTime: string;
+  bookingDate: string;
+  bookingTime: string;
+  reason: string;
+  }[] = [];
+
+
+  for (const appointment of appointments) {
+    // Combine bookingDate and bookingTime directly
+    const appointmentDateTime = new Date(`${appointment.bookingDate}T${appointment.bookingTime}`);
+    if (
+      appointmentDateTime < updatedStart ||
+      appointmentDateTime > updatedEnd
+    ) {
+      needChanges.push({
+        id: appointment.id,
+        fullDateTime: appointmentDateTime.toISOString(),
+        bookingDate: appointment.bookingDate,
+        bookingTime: appointment.bookingTime,
+        reason: `Outside availability window: ${updatedStart.toISOString()} - ${updatedEnd.toISOString()}`
+      });
+    }
+  }
+
+  return needChanges;
+  }
+
 }
+
+
+/* {
+  "doctor_id": 1,
+  "start_time": "2025-08-04T03:00:00.000Z",
+  "end_time": "2025-08-04T06:00:00.000Z"
+}
+*/
+
+/* {
+  "doctor_id": 1,
+  "start_time": "2025-08-04T04:45:00.000Z",
+  "end_time": "2025-08-04T05:30:00.000Z"
+}
+*/
+
+/* {
+  "doctor_id": 1,
+  "start_time": "2025-08-04T04:45:00.000Z",
+  "end_time": "2025-08-04T06:00:00.000Z"
+}
+*/
