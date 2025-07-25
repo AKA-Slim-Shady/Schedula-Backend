@@ -1,12 +1,8 @@
 import { IsNumber, IsString, IsDateString, IsEnum, IsNotEmpty, IsOptional } from "class-validator";
+import { Transform } from 'class-transformer'; // Import Transform
 import { ConsultingDay } from "../entities/appointment.entity";
 
-
 export class CreateAppointmentDto {
-  @IsNumber()
-  @IsNotEmpty()
-  doctorId: number;
-
   @IsDateString()
   @IsNotEmpty()
   bookingDate: string; // ISO 8601 format: YYYY-MM-DD

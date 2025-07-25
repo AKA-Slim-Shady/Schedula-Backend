@@ -4,6 +4,9 @@ export class CreateAvailabilityDto {
     @IsNumber()
     doctor_id: number;
 
+    @IsNumber()
+    time : number;
+    
     @IsArray()
     @ArrayNotEmpty()
     @IsString({ each: true })

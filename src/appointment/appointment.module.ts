@@ -14,5 +14,6 @@ import { JwtModule } from '@nestjs/jwt';
       }),],
   controllers: [AppointmentController],
   providers: [AppointmentService],
+  exports : [AppointmentService]
 })
 export class AppointmentModule {}
