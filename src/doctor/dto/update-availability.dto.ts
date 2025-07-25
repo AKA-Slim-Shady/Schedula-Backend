@@ -1,4 +1,4 @@
-import { IsNumber, IsString } from 'class-validator';
+import { IsEnum, IsNumber, IsString } from 'class-validator';
 
 export class UpdateAvailabilityDTO {
   @IsNumber()
@@ -9,4 +9,7 @@ export class UpdateAvailabilityDTO {
 
   @IsString()
   end_time: string;   // expect ISO string
+
+  @IsNumber()
+  time : number;
 }
