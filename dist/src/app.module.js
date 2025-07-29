@@ -17,6 +17,7 @@ const auth_module_1 = require("./auth/auth.module");
 const patient_module_1 = require("./patient/patient.module");
 const doctor_module_1 = require("./doctor/doctor.module");
 const appointment_module_1 = require("./appointment/appointment.module");
+const notification_service_service_1 = require("./notification-service/notification-service.service");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -24,7 +25,7 @@ exports.AppModule = AppModule = __decorate([
     (0, common_1.Module)({
         imports: [demo_module_1.DemoModule, typeorm_1.TypeOrmModule.forRoot(db_config_1.pgConfig), auth_module_1.AuthModule, patient_module_1.PatientModule, doctor_module_1.DoctorModule, appointment_module_1.AppointmentModule],
         controllers: [app_controller_1.AppController],
-        providers: [app_service_1.AppService],
+        providers: [app_service_1.AppService, notification_service_service_1.NotificationServiceService],
     })
 ], AppModule);
 //# sourceMappingURL=app.module.js.map

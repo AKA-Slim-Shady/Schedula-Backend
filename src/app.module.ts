@@ -10,10 +10,11 @@ import { AuthService } from './auth/auth.service';
 import { PatientModule } from './patient/patient.module';
 import { DoctorModule } from './doctor/doctor.module';
 import { AppointmentModule } from './appointment/appointment.module';
+import { NotificationServiceService } from './notification-service/notification-service.service';
 
 @Module({
   imports: [DemoModule , TypeOrmModule.forRoot(pgConfig), AuthModule, PatientModule, DoctorModule, AppointmentModule],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, NotificationServiceService],
 })
 export class AppModule {}

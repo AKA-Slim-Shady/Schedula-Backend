@@ -6,4 +6,5 @@ export declare class AuthService {
     constructor(user: Repository<User>);
     create(body: SignUpDTO): Promise<User>;
     findByEmail(emailid: string): Promise<User[]>;
+    getEmailById(id: number): Promise<string>;
 }
