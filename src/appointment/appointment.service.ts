@@ -65,13 +65,12 @@ export class AppointmentService {
   }
   // --- END NEW METHOD ---
 
-  async findByStatus(status : AppointmentStatus , doc_id : number , date : string){
-    let found = await this.appointmentsRepository.find({where : {status : status , doctorId : doc_id , bookingDate : date}});
-    if(!found || found.length === 0){ // Added length check
-      throw new NotFoundException(`No appointments found with status '${status}' for doctor ${doc_id} on ${date}.`);
-    }
-    return found;
-  }
+  async findByStatus(status: AppointmentStatus, doc_id: number, date: string) {
+  return this.appointmentsRepository.find({
+      where: { status: status, doctorId: doc_id, bookingDate: date }
+    });
+  } 
+
 
   async save(appointment: Appointment): Promise<Appointment> {
   return this.appointmentsRepository.save(appointment);

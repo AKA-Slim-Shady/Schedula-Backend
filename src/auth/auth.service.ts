@@ -18,4 +18,12 @@ export class AuthService {
         if(!obj) throw new NotFoundException();
         else return obj;
     }
+
+    async getEmailById(id : number){
+        const obj = await this.user.findOneBy({id : id});
+        if(!obj){
+            throw new NotFoundException;
+        }
+        return obj.email;
+    }
 }

@@ -21,10 +21,12 @@ import { CreateAvailabilityDto } from './dto/availability.dto';
 import { AppointmentService } from 'src/appointment/appointment.service';
 import { UpdateAvailabilityDTO } from './dto/update-availability.dto';
 import { Appointment, AppointmentStatus } from 'src/appointment/entities/appointment.entity';
+import { NotificationServiceService } from 'src/notification-service/notification-service.service';
+import { AuthService } from 'src/auth/auth.service';
 
 @Controller('doctor')
 export class DoctorController {
-  constructor(private readonly doctorService: DoctorService , private readonly jwtService : JwtService , private readonly appointmentService : AppointmentService) {}
+  constructor(private readonly doctorService: DoctorService , private readonly jwtService : JwtService , private readonly appointmentService : AppointmentService , private readonly notificationService : NotificationServiceService , private readonly userService : AuthService) {}
 
   @Post('createDoctor')
   create(@Body() createDoctorDto: CreateDoctorDto , @Req() req : Request) {
@@ -194,6 +196,44 @@ export class DoctorController {
       failedCount: failure.length,
       reassigned: success,
       failed: failure
-    };
+    }; 
+  }
+
+  // endpoint to send emails , for each type of scheduling send different emails
+  @Post('sendEmail')
+  async sendEmail(@Query('id') doc_id: string, @Query('date') bookingDate: string) {
+    const doctorId = parseInt(doc_id);
+    const successSent: { sentEmails: any }[] = [];
+    const status1 = 'RESCHEDULED'.toLowerCase() as AppointmentStatus;
+    const rescheduled = await this.appointmentService.findByStatus(status1 , doctorId, bookingDate);
+    if (rescheduled.length === 0) {
+      console.log(`No appointments found with status 'rescheduled' for doctor ${doctorId} on ${bookingDate}.`);
+    } 
+    else {
+      for (const appt of rescheduled) {
+        const email = await this.userService.getEmailById(appt.userId);
+        const sent = await this.notificationService.sendMailRescheduled(email, appt.bookingTime);
+        successSent.push({ sentEmails: sent });
+      }
+    }
+
+    const confirmed = await this.appointmentService.findByStatus(AppointmentStatus.CONFIRMED, doctorId, bookingDate);
+    if (confirmed.length === 0) {
+      console.log(`No appointments found with status 'confirmed' for doctor ${doctorId} on ${bookingDate}.`);
+    } 
+    else {
+      for (const appt of confirmed) {
+        const email = await this.userService.getEmailById(appt.userId);
+        const sent = await this.notificationService.sendMailConfirmed(email, appt.bookingTime);
+        successSent.push({ sentEmails: sent });
+      }
+    }
+
+    if (successSent.length === 0) {
+      throw new NotFoundException(`No appointments found with status 'confirmed' or 'rescheduled' for doctor ${doctorId} on ${bookingDate}.`);
+    }
+
+    return successSent;
   }
 }
+

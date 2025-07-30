@@ -33,6 +33,13 @@ let AuthService = class AuthService {
         else
             return obj;
     }
+    async getEmailById(id) {
+        const obj = await this.user.findOneBy({ id: id });
+        if (!obj) {
+            throw new common_1.NotFoundException;
+        }
+        return obj.email;
+    }
 };
 exports.AuthService = AuthService;
 exports.AuthService = AuthService = __decorate([
