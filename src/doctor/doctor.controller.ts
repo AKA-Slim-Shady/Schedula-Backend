@@ -83,120 +83,19 @@ export class DoctorController {
   @Query('date') bookingdate: string
   ) {
     const updated = await this.doctorService.updateAvailability(doc_id, updateDTO);
-
-    const updatedStart = updated.start_time; // Date objects (from DB, likely UTC)
-    const updatedEnd = updated.end_time;
-
-    const appointments = await this.appointmentService.findOneByDoctorAndDate(doc_id, bookingdate);
-
-    let needChanges: {
-      id: number;
-      fullDateTime: string;
-      bookingDate: string;
-      bookingTime: string;
-      reason: string;
-    }[] = [];
-
-    for (const appointment of appointments) {
-      // Create Date object assuming bookingTime is IST (UTC+5:30)
-      const appointmentDateTime = new Date(`${appointment.bookingDate}T${appointment.bookingTime}+05:30`);
-      
-      if (
-        appointmentDateTime < updatedStart ||
-        appointmentDateTime > updatedEnd
-      ) {
-        needChanges.push({
-          id: appointment.id,
-          fullDateTime: appointmentDateTime.toISOString(), // This will be the UTC ISO string
-          bookingDate: appointment.bookingDate,
-          bookingTime: appointment.bookingTime,
-          reason: `Outside availability window: ${updatedStart.toISOString()} - ${updatedEnd.toISOString()}`
-        });
-        // Ensure status is updated to 'rescheduled' immediately
-        await this.appointmentService.updateOne(appointment.id, 'rescheduled');
-      }
-    }
-    return needChanges;
+    const newSlot = await this.doctorService.adjustSlotDynamically(doc_id , bookingdate)
+    const changed = await this.doctorService.identifyAffected(updated , doc_id , bookingdate);
+    return changed;
   }
 
   @Post('rescheduleAffected')
   async reschedule(
   @Query('date') bookingDate: string,
-  @Query('id', ParseIntPipe) doc_id: number, // Use ParseIntPipe
+  @Query('id', ParseIntPipe) doc_id: number, 
   @Query('status') statusRaw: string,
   ) {
-    const doctorId = doc_id; // Already parsed by ParseIntPipe
-    const status = statusRaw.toLowerCase() as AppointmentStatus;
-    
-    const affected = await this.appointmentService.findByStatus(status , doctorId , bookingDate);
-    
-    const timeSlots = await this.doctorService.getFreeSlots(doctorId , bookingDate , this.appointmentService);
-    
-    let success: {
-      appointmentId: number;
-      originalTime: string;
-      reassignedTime: string;
-    }[] = [];
-
-    let failure: {
-      appointmentId: number;
-      reason: string;
-    }[] = [];
-
-
-    for (let appointment of affected) {
-      // Create appointmentTime Date object, explicitly specify IST timezone
-      const appointmentTime = new Date(`${bookingDate}T${appointment.bookingTime}+05:30`);
-      
-      let closest: string | null = null;
-      let minDiff = Number.POSITIVE_INFINITY;
-
-      for (let slot of timeSlots) {
-        // Create slotTime Date object, explicitly specify IST timezone for slots too
-        const slotTime = new Date(`${bookingDate}T${slot}+05:30`);
-        
-        const diff = Math.abs(slotTime.getTime() - appointmentTime.getTime()); // Comparison is now consistent (UTC vs UTC)
-
-        if (diff < minDiff) {
-          minDiff = diff;
-          closest = slot;
-        }
-      }
-
-      if (closest) {
-        success.push({
-          appointmentId: appointment.id,
-          originalTime: appointment.bookingTime,
-          reassignedTime: closest,
-        });
-
-        // Update appointment's bookingTime and status using the new service method
-        try {
-          await this.appointmentService.updateBookingDetails(appointment.id, closest, AppointmentStatus.CONFIRMED);
-        } catch (error) {
-          // Handle cases where update might fail (e.g., appointment not found, though unlikely here)
-          failure.push({
-            appointmentId: appointment.id,
-            reason: `Failed to update appointment details: ${error.message || 'Unknown error'}`,
-          });
-          continue; // Move to the next appointment
-        }
-        const index = timeSlots.indexOf(closest);
-        if (index > -1) timeSlots.splice(index, 1);
-      } else {
-        failure.push({
-          appointmentId: appointment.id,
-          reason: 'No available slot found',
-        });
-      }
-    }
-
-    return {
-      updatedCount: success.length,
-      failedCount: failure.length,
-      reassigned: success,
-      failed: failure
-    }; 
+     const changed = await this.doctorService.slotBasedRescheduling(doc_id , statusRaw , bookingDate);
+     return changed;
   }
 
   // endpoint to send emails , for each type of scheduling send different emails

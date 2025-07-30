@@ -1,5 +1,5 @@
 // src/availability/entities/availability.entity.ts
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, IsNull } from 'typeorm';
 
 @Entity()
 export class Availability {
@@ -9,7 +9,7 @@ export class Availability {
   @Column()
   doctor_id: number;
 
-  @Column() // <--- Make it nullable temporarily
+  @Column() 
   time : number;
 
   @Column("text", { array: true })
@@ -20,4 +20,7 @@ export class Availability {
 
   @Column()
   end_time: Date;
+
+  @Column({ default: 5, nullable: true })
+  updated_time: number;
 }
