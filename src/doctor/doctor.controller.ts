@@ -69,11 +69,13 @@ export class DoctorController {
   if (!bookingDate) {
     return { error: 'Please provide bookingDate as query parameter, e.g. ?date=2025-08-04' };
   }
-  return await this.doctorService.getFreeSlots(
-    doc_id,
-    bookingDate,
-    this.appointmentService
-  );
+  const check = await this.doctorService.getStrategy(doc_id);
+  if (check === 'wave') {
+    return await this.doctorService.waveSlots(doc_id , bookingDate);
+  } 
+  else {
+    return await this.doctorService.getFreeSlots(doc_id, bookingDate, this.appointmentService); 
+  }
   }
 
   @Patch('updateAvailability/:id')
@@ -92,11 +94,17 @@ export class DoctorController {
   async reschedule(
   @Query('date') bookingDate: string,
   @Query('id', ParseIntPipe) doc_id: number, 
-  @Query('status') statusRaw: string,
+  @Query('status') statusRaw: string
   ) {
-     const changed = await this.doctorService.slotBasedRescheduling(doc_id , statusRaw , bookingDate);
-     return changed;
+  const strategy = await this.doctorService.getStrategy(doc_id);
+  if (strategy === 'wave') {
+    return await this.doctorService.waveBasedRescheduling(doc_id, bookingDate);
+    } 
+  else {
+    return await this.doctorService.slotBasedRescheduling(doc_id, statusRaw, bookingDate);
+    }
   }
+
 
   // endpoint to send emails , for each type of scheduling send different emails
   @Post('sendEmail')

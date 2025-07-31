@@ -1,18 +1,23 @@
 // src/appointment/appointment.service.ts
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { forwardRef, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Appointment, AppointmentStatus } from './entities/appointment.entity';
 import { CreateAppointmentDto } from './dto/create-appointment.dto';
 import { PatientService } from '../patient/patient.service'; // Adjust path if needed
 import { UpdateAvailabilityDTO } from 'src/doctor/dto/update-availability.dto'; // Not used here, but kept for context
+import { DoctorService } from 'src/doctor/doctor.service';
 
 @Injectable()
 export class AppointmentService {
   constructor(
-    @InjectRepository(Appointment)
-    private appointmentsRepository: Repository<Appointment>, // This is private, correctly!
-    private readonly patientService: PatientService,
+  @InjectRepository(Appointment)
+  private appointmentsRepository: Repository<Appointment>,
+
+  private readonly patientService: PatientService,
+
+  @Inject(forwardRef(() => DoctorService))
+  private readonly doctorService: DoctorService,
   ) {}
 
   async create(createAppointmentDto: CreateAppointmentDto, doctorId: number, userId: number): Promise<Appointment> {
@@ -76,4 +81,14 @@ export class AppointmentService {
   return this.appointmentsRepository.save(appointment);
   }
 
+  async deleteAppointment(doc_id : number , id : number , bookingDate : string){
+    const deleted = await this.appointmentsRepository.delete({id : id , doctorId : doc_id});
+    const changed = await this.doctorService.getStrategy(doc_id);
+    if(changed === 'stream'){
+      return await this.doctorService.slotBasedRescheduling(doc_id , 'rescheduled' as AppointmentStatus , bookingDate);
+    }
+    else{
+      return await this.doctorService.waveBasedRescheduling(doc_id , bookingDate);
+    }
+  }
 }

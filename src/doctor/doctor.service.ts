@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateDoctorDto } from './dto/create-doctor.dto';
 import { CreateAvailabilityDto } from './dto/availability.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -65,6 +65,18 @@ export class DoctorService {
 
   return await this.AvailabilityRepository.save(old);
  }
+
+ async getStrategy(doc_id: number): Promise<string> {
+  const availability = await this.AvailabilityRepository.findOneBy({ doctor_id: doc_id });
+
+  if (!availability) {
+    throw new NotFoundException(`No availability found for doctor ID ${doc_id}`);
+  }
+
+  // Return strategy if exists, else 'stream' by default
+  return availability.strategy || 'stream';
+  }
+
 
  async getFreeSlots(
     doctorId: number,
@@ -152,7 +164,7 @@ export class DoctorService {
           
           if (
             appointmentDateTime < updatedStart ||
-            appointmentDateTime > updatedEnd
+            appointmentDateTime >= updatedEnd
           ) {
             needChanges.push({
               id: appointment.id,
@@ -255,8 +267,145 @@ export class DoctorService {
   const totalMinutes = (end - start) / (1000 * 60);
   const totalNumber = await this.appointmentService.findOneByDoctorAndDate(doc_id , bookingdate);
   const newSlot = Math.floor((totalMinutes / totalNumber.length));
+  if (totalNumber.length === 0) {
+  throw new BadRequestException('Cannot adjust slots dynamically with zero appointments');
+  }
   info.updated_time = newSlot;
   const updated = await this.AvailabilityRepository.save(info);
   return updated;
   }
+
+  async waveSlots(doc_id: number, bookingDate: string): Promise<string[]> {
+  const availability = await this.AvailabilityRepository.findOneBy({ doctor_id: doc_id });
+  if (!availability) throw new NotFoundException("Doctor availability not found");
+
+  const startTime = new Date(availability.start_time); // UTC assumed
+  const endTime = new Date(availability.end_time);
+  const waveDuration = 30; // in minutes
+  const maxPerWave = 3; // Max patients per wave
+
+  // Generate wave blocks
+  const waves: string[] = [];
+  const current = new Date(startTime);
+  while (current < endTime) {
+    const hr = current.getUTCHours().toString().padStart(2, '0');
+    const min = current.getUTCMinutes().toString().padStart(2, '0');
+    waves.push(`${hr}:${min}:00`);
+    current.setUTCMinutes(current.getUTCMinutes() + waveDuration);
+  }
+
+  // Fetch existing appointments for that day
+  const appointments = await this.appointmentService.findOneByDoctorAndDate(doc_id, bookingDate);
+
+  // Group appointments by wave start time
+  const waveCount: Record<string, number> = {};
+  for (let app of appointments) {
+    if (!app.bookingTime) continue;
+    // Convert to UTC
+    const dateObj = new Date(`${bookingDate}T${app.bookingTime}+05:30`);
+    const minutes = dateObj.getUTCMinutes();
+    const waveStartMin = Math.floor(minutes / waveDuration) * waveDuration;
+    const waveKey = `${dateObj.getUTCHours().toString().padStart(2, '0')}:${waveStartMin.toString().padStart(2, '0')}:00`;
+    waveCount[waveKey] = (waveCount[waveKey] || 0) + 1;
+  }
+
+  // Filter available waves
+  const freeWaveSlots = waves.filter(wave => {
+    return !waveCount[wave] || waveCount[wave] < maxPerWave;
+  });
+
+  // Convert UTC wave slots to IST string (HH:MM:SS)
+  const waveIST = freeWaveSlots.map(utcTime => {
+    const dateUTC = new Date(`${bookingDate}T${utcTime}Z`);
+    dateUTC.setMinutes(dateUTC.getMinutes() + 330); // +5:30 offset
+    const hr = dateUTC.getHours().toString().padStart(2, '0');
+    const min = dateUTC.getMinutes().toString().padStart(2, '0');
+    return `${hr}:${min}:00`;
+  });
+
+  return waveIST;
+  }
+
+  async waveBasedRescheduling(doc_id: number, bookingDate: string) {
+  const availability = await this.AvailabilityRepository.findOneBy({ doctor_id: doc_id });
+  if (!availability) throw new NotFoundException("Doctor availability not found");
+
+  const startTime = new Date(availability.start_time);
+  const endTime = new Date(availability.end_time);
+  const waveDuration = 30; // in minutes
+  const maxPerWave = 3; // Max patients per wave
+
+  // Step 1: Generate all possible wave slots in UTC
+  const waveSlots: string[] = [];
+  const curr = new Date(startTime);
+  while (curr < endTime) {
+    const hh = curr.getUTCHours().toString().padStart(2, '0');
+    const mm = curr.getUTCMinutes().toString().padStart(2, '0');
+    waveSlots.push(`${hh}:${mm}:00`);
+    curr.setUTCMinutes(curr.getUTCMinutes() + waveDuration);
+  }
+
+  // Step 2: Count existing confirmed appointments in each wave
+  const allAppointments = await this.appointmentService.findOneByDoctorAndDate(doc_id, bookingDate);
+  const waveCount: Record<string, number> = {};
+
+  for (let app of allAppointments) {
+    if (!app.bookingTime) continue;
+    const dateObj = new Date(`${bookingDate}T${app.bookingTime}+05:30`);
+    const mins = dateObj.getUTCMinutes();
+    const waveMin = Math.floor(mins / waveDuration) * waveDuration;
+    const waveKey = `${dateObj.getUTCHours().toString().padStart(2, '0')}:${waveMin.toString().padStart(2, '0')}:00`;
+    waveCount[waveKey] = (waveCount[waveKey] || 0) + 1;
+  }
+
+  // Step 3: Get all rescheduled appointments
+  const affected = await this.appointmentService.findByStatus('rescheduled' as AppointmentStatus, doc_id, bookingDate);
+
+  const success : {}[] = [];
+  const failure : {}[] = [];
+
+  for (let appointment of affected) {
+    let assigned = false;
+    for (const wave of waveSlots) {
+      if ((waveCount[wave] || 0) < maxPerWave) {
+        // Assign this appointment to this wave
+        const waveUTC = new Date(`${bookingDate}T${wave}Z`);
+        waveUTC.setMinutes(waveUTC.getMinutes() + 330); // Convert UTC to IST
+        const hr = waveUTC.getHours().toString().padStart(2, '0');
+        const min = waveUTC.getMinutes().toString().padStart(2, '0');
+        const newTime = `${hr}:${min}:00`;
+
+        try {
+          let str = 'confirmed' as AppointmentStatus
+          await this.appointmentService.updateBookingDetails(appointment.id, newTime, str);
+          waveCount[wave] = (waveCount[wave] || 0) + 1;
+          success.push({appointmentId: appointment.id,reassignedTime: newTime,});
+          assigned = true;
+          break;
+        } catch (error) {
+          failure.push({
+            appointmentId: appointment.id,
+            reason: `Failed to update booking: ${error.message || 'unknown'}`
+          });
+          assigned = true;
+          break;
+        }
+      }
+    }
+    if (!assigned) {
+      failure.push({
+        appointmentId: appointment.id,
+        reason: 'No wave slots available'
+      });
+    }
+  }
+
+  return {
+    reassigned: success,
+    failed: failure,
+    updatedCount: success.length,
+    failedCount: failure.length
+  };
+}
+
 }
