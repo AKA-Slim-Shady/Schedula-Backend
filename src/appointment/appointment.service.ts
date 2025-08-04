@@ -1,12 +1,14 @@
 // src/appointment/appointment.service.ts
-import { forwardRef, Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, forwardRef, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { Appointment, AppointmentStatus } from './entities/appointment.entity';
 import { CreateAppointmentDto } from './dto/create-appointment.dto';
 import { PatientService } from '../patient/patient.service'; // Adjust path if needed
 import { UpdateAvailabilityDTO } from 'src/doctor/dto/update-availability.dto'; // Not used here, but kept for context
 import { DoctorService } from 'src/doctor/doctor.service';
+import { NotificationServiceService } from 'src/notification-service/notification-service.service';
+import { AuthService } from 'src/auth/auth.service';
 
 @Injectable()
 export class AppointmentService {
@@ -16,26 +18,51 @@ export class AppointmentService {
 
   private readonly patientService: PatientService,
 
+  private readonly notificationService : NotificationServiceService,
+
+  private readonly userService : AuthService,
+
   @Inject(forwardRef(() => DoctorService))
   private readonly doctorService: DoctorService,
   ) {}
 
   async create(createAppointmentDto: CreateAppointmentDto, doctorId: number, userId: number): Promise<Appointment> {
-    const patient = await this.patientService.findOneByUserId(userId);
-    if (!patient) {
-      throw new NotFoundException(`Patient profile not found for user ID: ${userId}`);
-    }
-    const newAppointment = this.appointmentsRepository.create({
-      doctorId: doctorId,
-      bookingDate: createAppointmentDto.bookingDate,
-      bookingTime: createAppointmentDto.bookingTime,
-      consultingday: createAppointmentDto.consultingday,
-      userId: userId,
-      patientId: patient.id,
-    });
-
-    return this.appointmentsRepository.save(newAppointment);
+  const patient = await this.patientService.findOneByUserId(userId);
+  if (!patient) {
+    throw new NotFoundException(`Patient profile not found for user ID: ${userId}`);
   }
+
+  const { bookingDate, bookingTime, consultingday } = createAppointmentDto;
+  if (!bookingDate || !bookingTime || !consultingday) {
+    throw new BadRequestException('Missing booking fields');
+  }
+
+  const normalizedBookingTime = bookingTime.padEnd(8, ':00');
+  const validSlots = await this.doctorService.getFreeSlots(doctorId, bookingDate, this);
+
+  if (!validSlots.includes(normalizedBookingTime)) {
+    throw new BadRequestException('Selected slot is no longer available');
+  }
+
+  // Slot is available → proceed to book
+  const newAppointment = this.appointmentsRepository.create({
+    doctorId,
+    bookingDate,
+    bookingTime: normalizedBookingTime,
+    consultingday,
+    userId,
+    patientId: patient.id,
+    status: AppointmentStatus.CONFIRMED, // directly confirmed here
+  });
+
+  const saved = await this.appointmentsRepository.save(newAppointment);
+
+  const email = await this.userService.getEmailById(userId);
+  await this.notificationService.sendMailConfirmed(email, normalizedBookingTime);
+
+  return saved;
+  }
+
 
   async findAll(): Promise<Appointment[]> {
     return this.appointmentsRepository.find();
@@ -90,5 +117,15 @@ export class AppointmentService {
     else{
       return await this.doctorService.waveBasedRescheduling(doc_id , bookingDate);
     }
+  }
+
+  async findActiveAppointmentsByDoctorAndDate(id: number, date: string) {
+  return this.appointmentsRepository.find({
+    where: {
+      doctorId: id,
+      bookingDate: date,
+      status: In(['pending', 'confirmed', 'rescheduled']), 
+    },
+  });
   }
 }

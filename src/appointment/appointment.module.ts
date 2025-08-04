@@ -6,6 +6,9 @@ import { Appointment } from './entities/appointment.entity';
 import { PatientModule } from 'src/patient/patient.module';
 import { JwtModule } from '@nestjs/jwt';
 import { DoctorModule } from '../doctor/doctor.module';
+import { AuthModule } from 'src/auth/auth.module';
+import { NotificationModule } from 'src/notification-service/notification.module'; // adjust the path as needed
+
 
 @Module({
   imports: [
@@ -16,6 +19,8 @@ import { DoctorModule } from '../doctor/doctor.module';
       secret: 'supersecretkey',
       signOptions: { expiresIn: '1d' },
     }),
+    NotificationModule,
+    AuthModule
   ],
   controllers: [AppointmentController],
   providers: [AppointmentService],

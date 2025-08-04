@@ -24,7 +24,8 @@ exports.AuthModule = AuthModule = __decorate([
             jwt_1.JwtModule.register({
                 secret: 'supersecretkey',
                 signOptions: { expiresIn: '1d' },
-            }),]
+            }),],
+        exports: [auth_service_1.AuthService]
     })
 ], AuthModule);
 //# sourceMappingURL=auth.module.js.map
