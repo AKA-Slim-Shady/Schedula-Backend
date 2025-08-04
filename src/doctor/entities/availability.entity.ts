@@ -1,6 +1,12 @@
 // src/availability/entities/availability.entity.ts
 import { Entity, Column, PrimaryGeneratedColumn, IsNull } from 'typeorm';
 
+export enum SchedulingStrategy {
+  STREAM = 'stream',
+  WAVE = 'wave',
+  NONE = 'none'  // optional fallback
+}
+
 @Entity()
 export class Availability {
   @PrimaryGeneratedColumn()
@@ -23,4 +29,7 @@ export class Availability {
 
   @Column({ default: 5, nullable: true })
   updated_time: number;
+
+  @Column({ nullable: true, type: 'enum', enum: SchedulingStrategy, default: SchedulingStrategy.NONE })
+  strategy: SchedulingStrategy;
 }

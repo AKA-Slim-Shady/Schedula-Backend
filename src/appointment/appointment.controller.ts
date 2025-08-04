@@ -1,5 +1,5 @@
 // src/appointment/appointment.controller.ts
-import { Controller, Get, Post, Body, Patch, Param, Delete , Req, UnauthorizedException, ParseIntPipe} from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete , Req, UnauthorizedException, ParseIntPipe, Query, BadRequestException} from '@nestjs/common';
 import { AppointmentService } from './appointment.service';
 import { CreateAppointmentDto } from './dto/create-appointment.dto';
 import { Request } from 'express';
@@ -44,4 +44,16 @@ export class AppointmentController {
   }
 
   // ... rest of your controller methods remain unchanged
+
+  @Delete(':doctorId/:appointmentId')
+  async deleteAppointment(
+  @Param('doctorId', ParseIntPipe) doctorId: number,
+  @Param('appointmentId', ParseIntPipe) appointmentId: number,
+  @Query('date') bookingDate: string,
+  ) {
+  if (!bookingDate) {
+    throw new BadRequestException('Please provide bookingDate as a query parameter');
+  }
+  return await this.appointmentService.deleteAppointment(doctorId, appointmentId, bookingDate);
+  }
 }
