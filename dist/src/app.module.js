@@ -10,7 +10,6 @@ exports.AppModule = void 0;
 const common_1 = require("@nestjs/common");
 const app_controller_1 = require("./app.controller");
 const app_service_1 = require("./app.service");
-const demo_module_1 = require("./demo/demo.module");
 const typeorm_1 = require("@nestjs/typeorm");
 const db_config_1 = require("../db.config");
 const auth_module_1 = require("./auth/auth.module");
@@ -23,7 +22,7 @@ let AppModule = class AppModule {
 exports.AppModule = AppModule;
 exports.AppModule = AppModule = __decorate([
     (0, common_1.Module)({
-        imports: [demo_module_1.DemoModule, typeorm_1.TypeOrmModule.forRoot(db_config_1.pgConfig), auth_module_1.AuthModule, patient_module_1.PatientModule, doctor_module_1.DoctorModule, appointment_module_1.AppointmentModule],
+        imports: [typeorm_1.TypeOrmModule.forRoot(db_config_1.pgConfig), auth_module_1.AuthModule, patient_module_1.PatientModule, doctor_module_1.DoctorModule, appointment_module_1.AppointmentModule],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService, notification_service_service_1.NotificationServiceService],
     })

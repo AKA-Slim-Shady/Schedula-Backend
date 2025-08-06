@@ -32,15 +32,20 @@ export class DoctorController {
   create(@Body() createDoctorDto: CreateDoctorDto , @Req() req : Request) {
     const token = req.cookies['jwt'];
     const decoded = this.jwtService.verify(token);
-    const id = decoded.sub;
     if(decoded.role !== 'Doctor'){
-      throw new UnauthorizedException();
+      throw new UnauthorizedException('Only doctors can access this endpoint');
     }
+    const id = decoded.sub;
     return this.doctorService.create(createDoctorDto , id);
   }
 
   @Post('createAvailability/:id')
-  createAvail(@Body() availabilityDTO : CreateAvailabilityDto , @Param('id') doc_id : string){
+  createAvail(@Body() availabilityDTO : CreateAvailabilityDto , @Param('id') doc_id : string, @Req() req: Request){
+    const token = req.cookies['jwt'];
+    const decoded = this.jwtService.verify(token);
+    if(decoded.role !== 'Doctor'){
+      throw new UnauthorizedException('Only doctors can access this endpoint');
+    }
     return this.doctorService.createAvailability(availabilityDTO , parseInt(doc_id)); 
   }
 
@@ -57,33 +62,45 @@ export class DoctorController {
 
   // show all the appointments scheduled for a particular doctor id
   @Get('showAppointments/:id')
-  showAppointments(@Param('id') id : string){
+  showAppointments(@Param('id') id : string, @Req() req: Request){
+    const token = req.cookies['jwt'];
+    const decoded = this.jwtService.verify(token);
+    if(decoded.role !== 'Doctor'){
+      throw new UnauthorizedException('Only doctors can access this endpoint');
+    }
     return this.doctorService.showPatients(parseInt(id));
   }
 
   @Get(':id/freeSlots')
   async showSlots(
-  @Param('id', ParseIntPipe) doc_id: number,
-  @Query('date') bookingDate: string
+    @Param('id', ParseIntPipe) doc_id: number,
+    @Query('date') bookingDate: string,
+    @Req() req: Request,
   ) {
-  if (!bookingDate) {
-    return { error: 'Please provide bookingDate as query parameter, e.g. ?date=2025-08-04' };
-  }
-  const check = await this.doctorService.getStrategy(doc_id);
-  if (check === 'wave') {
-    return await this.doctorService.waveSlots(doc_id , bookingDate);
-  } 
-  else {
-    return await this.doctorService.getFreeSlots(doc_id, bookingDate, this.appointmentService); 
-  }
+    if (!bookingDate) {
+      return { error: 'Please provide bookingDate as query parameter, e.g. ?date=2025-08-04' };
+    }
+    const check = await this.doctorService.getStrategy(doc_id);
+    if (check === 'wave') {
+      return await this.doctorService.waveSlots(doc_id , bookingDate);
+    } 
+    else {
+      return await this.doctorService.getFreeSlots(doc_id, bookingDate, this.appointmentService); 
+    }
   }
 
   @Patch('updateAvailability/:id')
   async updateBasedOnDoctorAvailability(
-  @Body() updateDTO: UpdateAvailabilityDTO,
-  @Param('id', ParseIntPipe) doc_id: number,
-  @Query('date') bookingdate: string
+    @Body() updateDTO: UpdateAvailabilityDTO,
+    @Param('id', ParseIntPipe) doc_id: number,
+    @Query('date') bookingdate: string,
+    @Req() req: Request,
   ) {
+    const token = req.cookies['jwt'];
+    const decoded = this.jwtService.verify(token);
+    if(decoded.role !== 'Doctor'){
+      throw new UnauthorizedException('Only doctors can access this endpoint');
+    }
     const updated = await this.doctorService.updateAvailability(doc_id, updateDTO);
     const newSlot = await this.doctorService.adjustSlotDynamically(doc_id , bookingdate)
     const changed = await this.doctorService.identifyAffected(updated , doc_id , bookingdate);
@@ -92,10 +109,16 @@ export class DoctorController {
 
   @Post('rescheduleAffected')
   async reschedule(
-  @Query('date') bookingDate: string,
-  @Query('id', ParseIntPipe) doc_id: number, 
-  @Query('status') statusRaw: string
+    @Query('date') bookingDate: string,
+    @Query('id', ParseIntPipe) doc_id: number, 
+    @Query('status') statusRaw: string,
+    @Req() req: Request,
   ) {
+    const token = req.cookies['jwt'];
+    const decoded = this.jwtService.verify(token);
+    if(decoded.role !== 'Doctor'){
+      throw new UnauthorizedException('Only doctors can access this endpoint');
+    }
   const strategy = await this.doctorService.getStrategy(doc_id);
   if (strategy === 'wave') {
     return await this.doctorService.waveBasedRescheduling(doc_id, bookingDate);
@@ -108,7 +131,12 @@ export class DoctorController {
 
   // endpoint to send emails , for each type of scheduling send different emails
   @Post('sendEmail')
-  async sendEmail(@Query('id') doc_id: string, @Query('date') bookingDate: string) {
+  async sendEmail(@Query('id') doc_id: string, @Query('date') bookingDate: string, @Req() req: Request) {
+    const token = req.cookies['jwt'];
+    const decoded = this.jwtService.verify(token);
+    if(decoded.role !== 'Doctor'){
+      throw new UnauthorizedException('Only doctors can access this endpoint');
+    }
     const doctorId = parseInt(doc_id);
     const successSent: { sentEmails: any }[] = [];
     const status1 = 'RESCHEDULED'.toLowerCase() as AppointmentStatus;

@@ -1,7 +1,6 @@
 import { forwardRef, Module } from '@nestjs/common';
 import { DoctorService } from './doctor.service';
 import { DoctorController } from './doctor.controller';
-import { JwtModule } from '@nestjs/jwt';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Availability } from './entities/availability.entity';
 import { Doctor } from './entities/doctor.entity';
@@ -10,17 +9,15 @@ import { AppointmentModule } from 'src/appointment/appointment.module';
 import { NotificationServiceService } from 'src/notification-service/notification-service.service';
 import { AuthService } from 'src/auth/auth.service';
 import { User } from 'src/entities/user.entity';
+import { AuthModule } from '../auth/auth.module';
 
 @Module({
   imports: [
-    JwtModule.register({
-      secret: 'supersecretkey',
-      signOptions: { expiresIn: '1d' },
-    }),
     TypeOrmModule.forFeature([Availability, Doctor, Appointment, User]),
 
     // ✅ fix: use forwardRef to resolve circular dependency
     forwardRef(() => AppointmentModule),
+    AuthModule,
   ],
   controllers: [DoctorController],
   providers: [DoctorService, NotificationServiceService, AuthService],

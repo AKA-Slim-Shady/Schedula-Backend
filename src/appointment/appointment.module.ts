@@ -4,7 +4,6 @@ import { AppointmentController } from './appointment.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Appointment } from './entities/appointment.entity';
 import { PatientModule } from 'src/patient/patient.module';
-import { JwtModule } from '@nestjs/jwt';
 import { DoctorModule } from '../doctor/doctor.module';
 import { AuthModule } from 'src/auth/auth.module';
 import { NotificationModule } from 'src/notification-service/notification.module'; // adjust the path as needed
@@ -15,10 +14,6 @@ import { NotificationModule } from 'src/notification-service/notification.module
     TypeOrmModule.forFeature([Appointment]),
     forwardRef(() => PatientModule),
     forwardRef(() => DoctorModule),
-    JwtModule.register({
-      secret: 'supersecretkey',
-      signOptions: { expiresIn: '1d' },
-    }),
     NotificationModule,
     AuthModule
   ],
