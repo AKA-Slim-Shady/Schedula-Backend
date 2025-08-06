@@ -77,72 +77,79 @@ export class DoctorService {
   return availability.strategy || 'stream';
   }
 
+  async findAllByDoctor(id : number) : Promise<Availability[]>{
+    return await this.AvailabilityRepository.find({ where: { doctor_id: id } });
+  }
 
- async getFreeSlots(
-    doctorId: number,
-    bookingDate: string, // YYYY-MM-DD
-    appointmentService: AppointmentService
-  ): Promise<string[]> {
-    // Fetch existing appointments for the doctor on the given date
-    const appointments = await appointmentService.findOneByDoctorAndDate(doctorId, bookingDate);
+  async getFreeSlots(
+  doctorId: number,
+  bookingDate: string, // 'YYYY-MM-DD'
+  appointmentService: AppointmentService
+): Promise<string[]> {
+  const timingsArr = await this.findAllByDoctor(doctorId);
+  if (!timingsArr || timingsArr.length === 0) {
+    throw new NotFoundException('No availability found for this doctor.');
+  }
 
-    // Fetch the doctor's general availability (start_time, end_time)
-    const timingsArr = await this.findOne(doctorId);
-    if (!timingsArr || timingsArr.length === 0) {
-      throw new NotFoundException('No availability found for this doctor to generate slots.');
-    }
-    const timeSlotDurationMinutes =  timingsArr[0].updated_time ?? timingsArr[0].time;
+  const bookingDateObj = new Date(bookingDate);
+  const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  const dayOfWeek = daysOfWeek[bookingDateObj.getUTCDay()];
 
-    // Assuming timingsArr[0].start_time and end_time are UTC Date objects from DB.
-    // We need to work with these in UTC.
-    const doctorAvailabilityStartUTC = new Date(timingsArr[0].start_time);
-    const doctorAvailabilityEndUTC = new Date(timingsArr[0].end_time);
+  const matchingAvailabilities = timingsArr.filter(t =>
+    t.day_of_the_week.includes(dayOfWeek)
+  );
 
-    // Generate potential slots within the doctor's availability window (in UTC minutes)
-    let potentialSlotsUTC: string[] = [];
-    let currentTimeUTC = new Date(doctorAvailabilityStartUTC); // Start from the doctor's availability start
-    
-    // Loop until current time is beyond end time
-    while (currentTimeUTC.getTime() < doctorAvailabilityEndUTC.getTime()) {
-      // Format the current UTC time to HH:MM:SS for comparison
-      const hour = currentTimeUTC.getUTCHours().toString().padStart(2, '0');
-      const minute = currentTimeUTC.getUTCMinutes().toString().padStart(2, '0');
-      potentialSlotsUTC.push(`${hour}:${minute}:00`);
+  if (matchingAvailabilities.length === 0) return [];
 
-      // Add slot duration to current time
-      currentTimeUTC.setUTCMinutes(currentTimeUTC.getUTCMinutes() + timeSlotDurationMinutes);
-    }
-    
-    // Get booked slots, converting their local time to UTC HH:MM:SS for consistent comparison
-    const bookedSlotsUTC: string[] = appointments
-      .map(app => {
-        if (!app.bookingTime) return null;
-        // Construct a Date object from bookingDate and bookingTime, assume it's IST (UTC+5:30)
-        // Then convert it to UTC time string for comparison.
-        const bookingDateTimeIST = new Date(`${bookingDate}T${app.bookingTime}+05:30`); 
-        return bookingDateTimeIST.toISOString().slice(11, 19); // Extract HH:MM:SS from UTC ISO string
-      })
-      .filter(time => time !== null);
+  const timeSlotDurationMinutes = matchingAvailabilities[0].updated_time ?? matchingAvailabilities[0].time;
+  const finalFreeSlots: string[] = [];
 
-    // Filter out booked slots
-    const freeSlotsUTC = potentialSlotsUTC.filter(slot => !bookedSlotsUTC.includes(slot));
-    
-    // Convert the UTC free slots back to IST HH:MM:SS format for the response, as bookingTime is IST
-    const freeSlotsIST: string[] = freeSlotsUTC.map(utcTime => {
-      const utcDate = new Date(`${bookingDate}T${utcTime}`); // Create a Date object in server's local (assumed IST)
-      utcDate.setUTCHours(utcDate.getUTCHours()); // Ensure it's treated as UTC initially
-      utcDate.setUTCMinutes(utcDate.getUTCMinutes()); // Set minutes directly
-      // Adjust to IST
-      utcDate.setHours(utcDate.getHours() + 5); // Add 5 hours for IST offset
-      utcDate.setMinutes(utcDate.getMinutes() + 30); // Add 30 minutes for IST offset
+  let appointments: any[] = [];
+  try {
+    appointments = await appointmentService.findActiveAppointmentsByDoctorAndDate(doctorId, bookingDate);
+  } catch {
+    appointments = [];
+  }
 
-      const hour = utcDate.getHours().toString().padStart(2, '0');
-      const minute = utcDate.getMinutes().toString().padStart(2, '0');
-      return `${hour}:${minute}:00`;
+  // ✅ STEP 1: Convert booked times to IST strings like "HH:mm:ss"
+  const bookedISTTimes = appointments
+    .filter(app => ['pending', 'confirmed'].includes(app.status))
+    .map(app => {
+      const normalized = app.bookingTime.padEnd(8, ':00'); // Ensure HH:mm:ss
+      return normalized;
     });
 
-    return freeSlotsIST;
+  // ✅ STEP 2: Generate slots directly in IST and compare as raw strings
+  for (const timing of matchingAvailabilities) {
+    // Get just the time part (HH:mm:ss) from UTC Dates
+    const startTimeStr = timing.start_time.toISOString().slice(11, 19);
+    const endTimeStr = timing.end_time.toISOString().slice(11, 19);
+
+    // Create IST Date objects for the current day
+    const startIST = new Date(`${bookingDate}T${startTimeStr}Z`);
+    const endIST = new Date(`${bookingDate}T${endTimeStr}Z`);
+
+    // Convert to IST
+    startIST.setMinutes(startIST.getMinutes() + 330);
+    endIST.setMinutes(endIST.getMinutes() + 330);
+
+    let current = new Date(startIST);
+    while (current < endIST) {
+      const hour = current.getHours().toString().padStart(2, '0');
+      const minute = current.getMinutes().toString().padStart(2, '0');
+      const slot = `${hour}:${minute}:00`;
+
+      // Compare as raw string
+      if (!bookedISTTimes.includes(slot)) {
+        finalFreeSlots.push(slot);
+      }
+
+      current.setMinutes(current.getMinutes() + timeSlotDurationMinutes);
+    }
   }
+
+  return finalFreeSlots;
+}
 
   async identifyAffected(updated : Availability , doc_id : number , bookingdate : string){
         const updatedStart = updated.start_time; // Date objects (from DB, likely UTC)
@@ -406,6 +413,5 @@ export class DoctorService {
     updatedCount: success.length,
     failedCount: failure.length
   };
-}
-
+  }
 }
