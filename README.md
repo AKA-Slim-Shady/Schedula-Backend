@@ -1,98 +1,395 @@
+# 🏥 Schedula - Advanced Healthcare Appointment Management System
+
 <p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
+  <img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" />
+  <br>
+  <strong>Revolutionary Healthcare Scheduling Platform</strong>
 </p>
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
-
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
+<p align="center">
+  <a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
+  <a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
+  <a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
+  <a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
 </p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
 
-## Description
+## 🚀 Overview
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+**Schedula** is a cutting-edge healthcare appointment management system built with NestJS, TypeScript, and PostgreSQL. It revolutionizes how healthcare providers and patients interact by offering intelligent scheduling, automated notifications, and sophisticated appointment management capabilities.
 
-## Project setup
+## ✨ Key Features
 
-```bash
-$ npm install
+### 🎯 **Intelligent Scheduling Strategies**
+- **Stream-based Scheduling**: Traditional time-slot based appointments with flexible duration
+- **Wave-based Scheduling**: Group appointments in 30-minute waves (max 3 patients per wave) for efficient patient flow
+- **Dynamic Slot Adjustment**: Automatically adjusts slot durations based on appointment load
+- **Real-time Availability**: Instant slot availability checking with conflict resolution
+
+### 🔐 **Advanced Security & Authentication**
+- **JWT-based Authentication**: Secure token-based authentication with HTTP-only cookies
+- **Role-based Access Control**: Granular permissions for Patients, Doctors, and Administrators
+- **Password Hashing**: Bcrypt encryption for secure password storage
+- **Session Management**: Automatic token expiration and renewal
+
+### 📧 **Automated Notification System**
+- **Email Notifications**: Automated email alerts for appointment confirmations and rescheduling
+- **Real-time Updates**: Instant notifications when appointments are modified
+- **Professional Templates**: Well-crafted email templates for different scenarios
+- **SMTP Integration**: Configurable email service integration
+
+### 🌍 **Timezone & International Support**
+- **IST Timezone Handling**: Native support for Indian Standard Time (UTC+5:30)
+- **Automatic Conversion**: Seamless UTC to IST conversion for all time operations
+- **Date/Time Validation**: Robust date and time validation with ISO 8601 support
+- **Multi-timezone Ready**: Architecture supports multiple timezone implementations
+
+### 🎨 **Smart Appointment Management**
+- **Conflict Detection**: Automatic detection of scheduling conflicts
+- **Intelligent Rescheduling**: AI-powered rescheduling with closest slot matching
+- **Status Tracking**: Comprehensive appointment status management (Pending, Confirmed, Rescheduled)
+- **Bulk Operations**: Efficient handling of multiple appointment updates
+
+### 🏥 **Healthcare-Specific Features**
+- **Doctor Specialization**: Support for different medical specializations
+- **Patient Profiles**: Comprehensive patient information management
+- **Consulting Days**: Flexible scheduling based on doctor availability
+- **Medical Records Integration**: Ready for electronic health record integration
+
+### 🔄 **Advanced Rescheduling Engine**
+- **Automatic Conflict Resolution**: Intelligent handling of scheduling conflicts
+- **Wave-based Rescheduling**: Efficient rescheduling within wave constraints
+- **Slot-based Rescheduling**: Flexible rescheduling with closest slot matching
+- **Affected Appointment Detection**: Automatic identification of impacted appointments
+
+### 📊 **Data Management & Analytics**
+- **PostgreSQL Database**: Robust, scalable database with TypeORM integration
+- **Entity Relationships**: Well-designed database schema with proper relationships
+- **Data Validation**: Comprehensive input validation with class-validator
+- **Audit Trail**: Complete tracking of appointment changes and modifications
+
+## 🛠 Technology Stack
+
+- **Framework**: NestJS (Node.js)
+- **Language**: TypeScript
+- **Database**: PostgreSQL with TypeORM
+- **Authentication**: JWT with Passport.js
+- **Email**: Nodemailer with SMTP
+- **Validation**: class-validator & class-transformer
+- **Security**: bcrypt for password hashing
+- **Deployment**: Ready for cloud deployment
+
+## 📋 API Endpoints
+
+### 🔐 Authentication (`/auth`)
+
+#### POST `/auth/signup`
+**Description:** Register a new user
+**Body:**
+```json
+{
+  "email": "string",
+  "password": "string", 
+  "role": "string"
+}
 ```
 
-## Compile and run the project
+#### POST `/auth/signin`
+**Description:** Login user and get JWT token
+**Body:**
+```json
+{
+  "email": "string",
+  "password": "string"
+}
+```
+**Response:** Sets JWT cookie and returns user info
 
-```bash
-# development
-$ npm run start
+---
 
-# watch mode
-$ npm run start:dev
+### 👥 Patient Management (`/patient`)
 
-# production mode
-$ npm run start:prod
+#### POST `/patient/createPatientProfile`
+**Description:** Create a new patient profile
+**Authentication:** Requires Patient role
+**Body:**
+```json
+{
+  "name": "string",
+  "age": "number",
+  "gender": "string"
+}
 ```
 
-## Run tests
+#### GET `/patient/viewPatients`
+**Description:** Get all patients (Doctors only)
+**Authentication:** Requires Doctor role
+
+#### GET `/patient/:id`
+**Description:** Get patient by ID (Doctors only)
+**Authentication:** Requires Doctor role
+**Parameters:** `id` (string)
+
+#### PATCH `/patient/:id`
+**Description:** Update patient profile
+**Authentication:** Requires Patient role
+**Parameters:** `id` (string)
+**Body:**
+```json
+{
+  "name": "string",     // optional
+  "age": "number",      // optional
+  "gender": "string"    // optional
+}
+```
+
+#### DELETE `/patient/:id`
+**Description:** Delete patient profile
+**Authentication:** Requires Patient role
+**Parameters:** `id` (string)
+
+---
+
+### 👨‍⚕️ Doctor Management (`/doctor`)
+
+#### POST `/doctor/createDoctor`
+**Description:** Create a new doctor profile
+**Authentication:** Requires Doctor role
+**Body:**
+```json
+{
+  "name": "string",
+  "specialization": "string",
+  "experience": "string"
+}
+```
+
+#### POST `/doctor/createAvailability/:id`
+**Description:** Create availability for a doctor
+**Authentication:** Requires Doctor role
+**Parameters:** `id` (string) - doctor ID
+**Body:**
+```json
+{
+  "doctor_id": "number",
+  "time": "number",
+  "day_of_the_week": ["string"],
+  "start_time": "Date",
+  "end_time": "Date"
+}
+```
+
+#### GET `/doctor`
+**Description:** Get all doctors
+
+#### GET `/doctor/availability/:id`
+**Description:** Get availability for a specific doctor
+**Parameters:** `id` (string) - doctor ID
+
+#### GET `/doctor/showAppointments/:id`
+**Description:** Show all appointments for a specific doctor
+**Authentication:** Requires Doctor role
+**Parameters:** `id` (string) - doctor ID
+
+#### GET `/doctor/:id/freeSlots`
+**Description:** Get free slots for a doctor on a specific date
+**Parameters:** 
+- `id` (number) - doctor ID
+- `date` (query) - booking date (YYYY-MM-DD format)
+
+#### PATCH `/doctor/updateAvailability/:id`
+**Description:** Update doctor availability and reschedule affected appointments
+**Authentication:** Requires Doctor role
+**Parameters:** 
+- `id` (number) - doctor ID
+- `date` (query) - booking date
+**Body:**
+```json
+{
+  "doctor_id": "number",
+  "start_time": "string",  // ISO string
+  "end_time": "string",    // ISO string
+  "time": "number"
+}
+```
+
+#### POST `/doctor/rescheduleAffected`
+**Description:** Reschedule affected appointments
+**Authentication:** Requires Doctor role
+**Query Parameters:**
+- `date` (string) - booking date
+- `id` (number) - doctor ID
+- `status` (string) - appointment status
+
+#### POST `/doctor/sendEmail`
+**Description:** Send emails to patients for confirmed/rescheduled appointments
+**Authentication:** Requires Doctor role
+**Query Parameters:**
+- `id` (string) - doctor ID
+- `date` (string) - booking date
+
+---
+
+### 📅 Appointment Management (`/appointment`)
+
+#### POST `/appointment/bookAppointment/:doctorId`
+**Description:** Book an appointment with a doctor
+**Authentication:** Requires Patient role
+**Parameters:** `doctorId` (number) - doctor ID
+**Body:**
+```json
+{
+  "bookingDate": "string",           // ISO 8601 format: YYYY-MM-DD
+  "bookingTime": "string",           // optional, Format: HH:MM
+  "consultingday": "ConsultingDay"   // enum: "Monday" | "Tuesday" | "Wednesday" | "Thursday" | "Friday" | "Saturday" | "Sunday"
+}
+```
+
+#### GET `/appointment`
+**Description:** Get all appointments
+
+#### DELETE `/appointment/:doctorId/:appointmentId`
+**Description:** Delete an appointment
+**Authentication:** Requires Patient role
+**Parameters:** 
+- `doctorId` (number) - doctor ID
+- `appointmentId` (number) - appointment ID
+**Query Parameters:**
+- `date` (string) - booking date
+
+---
+
+### 🏠 Health Check (`/`)
+
+#### GET `/`
+**Description:** Health check endpoint
+**Response:** "Hello World!"
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+- Node.js (v16 or higher)
+- PostgreSQL database
+- npm or yarn package manager
+
+### Installation
+
+1. **Clone the repository**
+```bash
+git clone <repository-url>
+cd schedula
+```
+
+2. **Install dependencies**
+```bash
+npm install
+```
+
+3. **Configure database**
+Update the database configuration in `db.config.ts` with your PostgreSQL credentials.
+
+4. **Run the application**
+```bash
+# Development mode
+npm run start:dev
+
+# Production mode
+npm run start:prod
+```
+
+### Environment Variables
+Create a `.env` file in the root directory:
+```env
+PORT=3000
+DATABASE_URL=your_postgresql_connection_string
+JWT_SECRET=your_jwt_secret
+SMTP_HOST=your_smtp_host
+SMTP_PORT=587
+SMTP_USER=your_smtp_user
+SMTP_PASS=your_smtp_password
+```
+
+## 🧪 Testing
 
 ```bash
-# unit tests
-$ npm run test
+# Unit tests
+npm run test
 
 # e2e tests
-$ npm run test:e2e
+npm run test:e2e
 
-# test coverage
-$ npm run test:cov
+# Test coverage
+npm run test:cov
 ```
 
-## Deployment
+## 📊 Data Models
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
-
-```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+### ConsultingDay Enum
+```typescript
+enum ConsultingDay {
+  MONDAY = 'Monday',
+  TUESDAY = 'Tuesday', 
+  WEDNESDAY = 'Wednesday',
+  THURSDAY = 'Thursday',
+  FRIDAY = 'Friday',
+  SATURDAY = 'Saturday',
+  SUNDAY = 'Sunday'
+}
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+### AppointmentStatus Enum
+```typescript
+enum AppointmentStatus {
+  PENDING = 'pending',
+  CONFIRMED = 'confirmed',
+  RESCHEDULED = 'rescheduled'
+}
+```
 
-## Resources
+### SchedulingStrategy Enum
+```typescript
+enum SchedulingStrategy {
+  STREAM = 'stream',
+  WAVE = 'wave',
+  NONE = 'none'
+}
+```
 
-Check out a few resources that may come in handy when working with NestJS:
+## 🔒 Security Features
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+- **JWT Authentication**: Secure token-based authentication
+- **Role-based Access Control**: Granular permissions system
+- **Password Hashing**: Bcrypt encryption
+- **Input Validation**: Comprehensive request validation
+- **SQL Injection Protection**: TypeORM parameterized queries
+- **CORS Support**: Configurable cross-origin resource sharing
 
-## Support
+## 🌟 Why Schedula?
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+1. **Intelligent Scheduling**: Advanced algorithms for optimal appointment management
+2. **Healthcare-Focused**: Built specifically for healthcare industry needs
+3. **Scalable Architecture**: Designed to handle high-volume appointment systems
+4. **User-Friendly**: Intuitive API design with comprehensive documentation
+5. **Production-Ready**: Enterprise-grade security and reliability features
+6. **Extensible**: Modular design for easy feature additions
+7. **Time-Aware**: Sophisticated timezone handling for global deployments
 
-## Stay in touch
+## 🤝 Contributing
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+We welcome contributions! Please read our contributing guidelines and submit pull requests.
 
-## License
+## 📄 License
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🆘 Support
+
+For support and questions:
+- 📧 Email: support@schedula.com
+- 💬 Discord: [Join our community](https://discord.gg/G7Qnnhy)
+- 📖 Documentation: [Full API Documentation](https://docs.schedula.com)
+
+---
+
+**Built with ❤️ using NestJS and TypeScript**
