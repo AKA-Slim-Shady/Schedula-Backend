@@ -1,9 +1,11 @@
 # 🏥 Schedula - Advanced Healthcare Appointment Management System
 
 <p align="center">
-  <img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" />
-  <br>
   <strong>Revolutionary Healthcare Scheduling Platform</strong>
+  <br>
+  <a href="https://www.linkedin.com/in/surya-k-9658992b2" target="_blank">
+    <img src="https://img.shields.io/badge/LinkedIn-Connect-blue?style=for-the-badge&logo=linkedin" alt="Connect on LinkedIn" />
+  </a>
 </p>
 
 <p align="center">
