@@ -28,23 +28,42 @@ let PatientController = class PatientController {
     create(createPatientDto, req) {
         const token = req.cookies['jwt'];
         const decoded = this.jwtService.verify(token);
-        console.log(decoded);
         if (decoded.role !== 'Patient') {
-            return new common_1.UnauthorizedException();
+            throw new common_1.UnauthorizedException('Only patients can access this endpoint');
         }
         const userID = decoded.sub;
         return this.patientService.create(createPatientDto, userID);
     }
-    findAll() {
+    findAll(req) {
+        const token = req.cookies['jwt'];
+        const decoded = this.jwtService.verify(token);
+        if (decoded.role !== 'Doctor') {
+            throw new common_1.UnauthorizedException('Only doctors can access this endpoint');
+        }
         return this.patientService.findAll();
     }
-    findOne(id) {
+    findOne(id, req) {
+        const token = req.cookies['jwt'];
+        const decoded = this.jwtService.verify(token);
+        if (decoded.role !== 'Doctor') {
+            throw new common_1.UnauthorizedException('Only doctors can access this endpoint');
+        }
         return this.patientService.findOne(+id);
     }
-    update(id, updatePatientDto) {
+    update(id, updatePatientDto, req) {
+        const token = req.cookies['jwt'];
+        const decoded = this.jwtService.verify(token);
+        if (decoded.role !== 'Patient') {
+            throw new common_1.UnauthorizedException('Only patients can access this endpoint');
+        }
         return this.patientService.update(+id, updatePatientDto);
     }
-    remove(id) {
+    remove(id, req) {
+        const token = req.cookies['jwt'];
+        const decoded = this.jwtService.verify(token);
+        if (decoded.role !== 'Patient') {
+            throw new common_1.UnauthorizedException('Only patients can access this endpoint');
+        }
         return this.patientService.remove(+id);
     }
 };
@@ -60,30 +79,34 @@ __decorate([
 ], PatientController.prototype, "create", null);
 __decorate([
     (0, common_1.Get)('viewPatients'),
+    __param(0, (0, common_1.Req)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
+    __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", void 0)
 ], PatientController.prototype, "findAll", null);
 __decorate([
     (0, common_1.Get)(':id'),
     __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Req)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [String, Object]),
     __metadata("design:returntype", void 0)
 ], PatientController.prototype, "findOne", null);
 __decorate([
     (0, common_1.Patch)(':id'),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Body)()),
+    __param(2, (0, common_1.Req)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, update_patient_dto_1.UpdatePatientDto]),
+    __metadata("design:paramtypes", [String, update_patient_dto_1.UpdatePatientDto, Object]),
     __metadata("design:returntype", void 0)
 ], PatientController.prototype, "update", null);
 __decorate([
     (0, common_1.Delete)(':id'),
     __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Req)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [String, Object]),
     __metadata("design:returntype", void 0)
 ], PatientController.prototype, "remove", null);
 exports.PatientController = PatientController = __decorate([

@@ -12,17 +12,13 @@ const patient_service_1 = require("./patient.service");
 const patient_controller_1 = require("./patient.controller");
 const typeorm_1 = require("@nestjs/typeorm");
 const patient_entity_1 = require("./entities/patient.entity");
-const jwt_1 = require("@nestjs/jwt");
+const auth_module_1 = require("../auth/auth.module");
 let PatientModule = class PatientModule {
 };
 exports.PatientModule = PatientModule;
 exports.PatientModule = PatientModule = __decorate([
     (0, common_1.Module)({
-        imports: [typeorm_1.TypeOrmModule.forFeature([patient_entity_1.Patient]),
-            jwt_1.JwtModule.register({
-                secret: 'supersecretkey',
-                signOptions: { expiresIn: '1d' },
-            }),],
+        imports: [typeorm_1.TypeOrmModule.forFeature([patient_entity_1.Patient]), auth_module_1.AuthModule],
         controllers: [patient_controller_1.PatientController],
         providers: [patient_service_1.PatientService],
         exports: [patient_service_1.PatientService]

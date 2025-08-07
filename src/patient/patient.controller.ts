@@ -17,31 +17,50 @@ export class PatientController {
   create(@Body() createPatientDto: CreatePatientDto , @Req() req: Request) {
     const token = req.cookies['jwt'];
     const decoded = this.jwtService.verify(token);
-    console.log(decoded);
     if(decoded.role !== 'Patient'){
-      return new UnauthorizedException();
+      throw new UnauthorizedException('Only patients can access this endpoint');
     }
     const userID = decoded.sub;
     return this.patientService.create(createPatientDto , userID);
   }
 
   @Get('viewPatients')
-  findAll() {
+  findAll(@Req() req: Request) {
+    const token = req.cookies['jwt'];
+    const decoded = this.jwtService.verify(token);
+    if(decoded.role !== 'Doctor'){
+      throw new UnauthorizedException('Only doctors can access this endpoint');
+    }
     return this.patientService.findAll();
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
+  findOne(@Param('id') id: string, @Req() req: Request) {
+    const token = req.cookies['jwt'];
+    const decoded = this.jwtService.verify(token);
+    if(decoded.role !== 'Doctor'){
+      throw new UnauthorizedException('Only doctors can access this endpoint');
+    }
     return this.patientService.findOne(+id);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updatePatientDto: UpdatePatientDto) {
+  update(@Param('id') id: string, @Body() updatePatientDto: UpdatePatientDto, @Req() req: Request) {
+    const token = req.cookies['jwt'];
+    const decoded = this.jwtService.verify(token);
+    if(decoded.role !== 'Patient'){
+      throw new UnauthorizedException('Only patients can access this endpoint');
+    }
     return this.patientService.update(+id, updatePatientDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
+  remove(@Param('id') id: string, @Req() req: Request) {
+    const token = req.cookies['jwt'];
+    const decoded = this.jwtService.verify(token);
+    if(decoded.role !== 'Patient'){
+      throw new UnauthorizedException('Only patients can access this endpoint');
+    }
     return this.patientService.remove(+id);
   }
 }

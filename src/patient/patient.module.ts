@@ -3,14 +3,10 @@ import { PatientService } from './patient.service';
 import { PatientController } from './patient.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Patient } from './entities/patient.entity';
-import { JwtModule } from '@nestjs/jwt';
+import { AuthModule } from '../auth/auth.module';
 
 @Module({
-  imports : [TypeOrmModule.forFeature([Patient]) , 
-  JwtModule.register({
-      secret: 'supersecretkey',
-      signOptions: { expiresIn: '1d' },
-    }),],
+  imports : [TypeOrmModule.forFeature([Patient]), AuthModule],
   controllers: [PatientController],
   providers: [PatientService],
   exports : [PatientService]
