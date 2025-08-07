@@ -383,13 +383,6 @@ We welcome contributions! Please read our contributing guidelines and submit pul
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 🆘 Support
-
-For support and questions:
-- 📧 Email: support@schedula.com
-- 💬 Discord: [Join our community](https://discord.gg/G7Qnnhy)
-- 📖 Documentation: [Full API Documentation](https://docs.schedula.com)
-
 ---
 
 **Built with ❤️ using NestJS and TypeScript**
