@@ -8,13 +8,6 @@
   </a>
 </p>
 
-<p align="center">
-  <a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-  <a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-  <a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-  <a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-</p>
-
 ## 🚀 Overview
 
 **Schedula** is a cutting-edge healthcare appointment management system built with NestJS, TypeScript, and PostgreSQL. It revolutionizes how healthcare providers and patients interact by offering intelligent scheduling, automated notifications, and sophisticated appointment management capabilities.
